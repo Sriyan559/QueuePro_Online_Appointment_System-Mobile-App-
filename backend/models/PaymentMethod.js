@@ -1,30 +1,32 @@
 const mongoose = require('mongoose');
 
-const serviceCenterSchema = mongoose.Schema({
-    providerId: {
+const paymentMethodSchema = mongoose.Schema({
+    customerId: {
         type: mongoose.Schema.Types.ObjectId,
         required: true,
         ref: 'User',
     },
-    name: {
-        type: String,
-        required: true,
-    },
-    location: {
-        type: String,
-        required: true,
-    },
-    contact: {
-        type: String,
-        required: true,
-    },
     type: {
         type: String,
+        enum: ['Visa', 'Mastercard', 'Amex', 'Wallet'],
+        required: true,
     },
-    packageType: {
+    last4: {
         type: String,
-        default: 'Basic',
+        required: true,
     },
+    cardHolder: {
+        type: String,
+        required: true,
+    },
+    expiry: {
+        type: String,
+        required: true,
+    },
+    isDefault: {
+        type: Boolean,
+        default: false,
+    }
 }, { timestamps: true });
 
-module.exports = mongoose.model('ServiceCenter', serviceCenterSchema);
+module.exports = mongoose.model('PaymentMethod', paymentMethodSchema);

@@ -1,4 +1,5 @@
 const Payment = require('../models/Payment');
+const PaymentMethod = require('../models/PaymentMethod');
 
 // @desc    Make a payment
 // @route   POST /api/payments
@@ -15,7 +16,7 @@ const makePayment = async (req, res) => {
     });
 
     const createdPayment = await payment.save();
-    res.status(214).json(createdPayment);
+    res.status(201).json(createdPayment);
 };
 
 // @desc    Get user's payment history
@@ -43,8 +44,36 @@ const updatePayment = async (req, res) => {
     }
 };
 
+// @desc    Add a payment method
+// @route   POST /api/payments/methods
+// @access  Private
+const addPaymentMethod = async (req, res) => {
+    const { type, last4, cardHolder, expiry } = req.body;
+
+    const method = new PaymentMethod({
+        customerId: req.user._id,
+        type,
+        last4,
+        cardHolder,
+        expiry,
+    });
+
+    const createdMethod = await method.save();
+    res.status(201).json(createdMethod);
+};
+
+// @desc    Get user's payment methods
+// @route   GET /api/payments/methods
+// @access  Private
+const getMyPaymentMethods = async (req, res) => {
+    const methods = await PaymentMethod.find({ customerId: req.user._id });
+    res.json(methods);
+};
+
 module.exports = {
     makePayment,
     getMyPayments,
     updatePayment,
+    addPaymentMethod,
+    getMyPaymentMethods,
 };

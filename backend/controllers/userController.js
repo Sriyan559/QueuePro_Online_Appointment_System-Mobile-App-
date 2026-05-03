@@ -1,6 +1,13 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 
+// Generate JWT
+const generateToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', {
+        expiresIn: '30d',
+    });
+};
+
 // @desc    Register a new user
 // @route   POST /api/users
 // @access  Public
@@ -140,17 +147,73 @@ const resetPassword = async (req, res) => {
     res.json({ message: 'Password has been reset successfully' });
 };
 
-// Generate JWT
-const generateToken = (id) => {
-    return jwt.sign({ id }, process.env.JWT_SECRET || 'secret123', {
-        expiresIn: '30d',
-    });
+// @desc    Update user profile
+// @route   PUT /api/users/profile
+// @access  Private
+const updateUserProfile = async (req, res) => {
+    try {
+        console.log('Update Profile Request for User ID:', req.user?._id);
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ message: 'Not authorized, no user ID' });
+        }
+        const user = await User.findById(req.user._id);
+
+        if (user) {
+            // Only update if provided in body
+            if (req.body.name !== undefined) user.name = req.body.name;
+            if (req.body.phone !== undefined) user.phone = req.body.phone;
+            
+            if (req.body.password) {
+                user.password = req.body.password;
+            }
+
+            const updatedUser = await user.save();
+
+            res.json({
+                _id: updatedUser._id,
+                name: updatedUser.name,
+                email: updatedUser.email,
+                role: updatedUser.role,
+                phone: updatedUser.phone,
+                token: generateToken(updatedUser._id),
+            });
+        } else {
+            console.warn('Profile Update Failed: User not found in database for ID:', req.user._id);
+            res.status(404).json({ message: `User not found (ID: ${req.user._id})` });
+        }
+    } catch (error) {
+        console.error('Update Profile Controller CRASH:', error);
+        res.status(500).json({ message: 'Internal Server Error during profile update' });
+    }
+};
+
+// @desc    Change user password
+// @route   PUT /api/users/change-password
+// @access  Private
+const changePassword = async (req, res) => {
+    try {
+        const { currentPassword, newPassword } = req.body;
+        const user = await User.findById(req.user._id);
+
+        if (user && (await user.matchPassword(currentPassword))) {
+            user.password = newPassword;
+            await user.save();
+            res.json({ message: 'Password updated successfully' });
+        } else {
+            res.status(401).json({ message: 'Invalid current password' });
+        }
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: error.message || 'Server Error' });
+    }
 };
 
 module.exports = {
     registerUser,
     authUser,
     getUserProfile,
+    updateUserProfile,
+    changePassword,
     getAllUsers,
     forgotPassword,
     resetPassword,

@@ -4,7 +4,7 @@ const ServiceCenter = require('../models/ServiceCenter');
 // @route   POST /api/centers
 // @access  Private/ServiceProvider
 const createCenter = async (req, res) => {
-    const { name, location, contact, type } = req.body;
+    const { name, location, contact, type, packageType } = req.body;
 
     const center = new ServiceCenter({
         providerId: req.user._id,
@@ -12,10 +12,11 @@ const createCenter = async (req, res) => {
         location,
         contact,
         type,
+        packageType,
     });
 
     const createdCenter = await center.save();
-    res.status(210).json(createdCenter);
+    res.status(201).json(createdCenter);
 };
 
 // @desc    Get all service centers

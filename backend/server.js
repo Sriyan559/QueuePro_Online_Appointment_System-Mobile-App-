@@ -16,6 +16,12 @@ const app = express();
 // Body parser
 app.use(express.json());
 
+// Request logger
+app.use((req, res, next) => {
+    console.log(`${req.method} ${req.url}`);
+    next();
+});
+
 // Enable CORS
 app.use(cors());
 
@@ -54,6 +60,10 @@ app.get('/', (req, res) => {
 });
 
 // Routes
+const { protect } = require('./middlewares/authMiddleware');
+const { updateUserProfile } = require('./controllers/userController');
+app.put('/api/users/profile', protect, updateUserProfile);
+
 app.use('/api/users', require('./routes/userRoutes'));
 app.use('/api/centers', require('./routes/centerRoutes'));
 app.use('/api/queues', require('./routes/queueRoutes'));

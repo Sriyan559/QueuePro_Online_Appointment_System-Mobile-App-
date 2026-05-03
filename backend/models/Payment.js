@@ -12,7 +12,7 @@ const paymentSchema = mongoose.Schema({
     },
     type: {
         type: String,
-        enum: ['Appointment', 'Service'],
+        enum: ['Appointment', 'Service', 'CenterRegistration'],
         required: true,
     },
     status: {
