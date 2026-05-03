@@ -1,2 +1,2 @@
 # QueuePro_Online_Appointment_System-Mobile-App-
-Backend Url : https://queuepro.up.railway.app
+Backend Url :sublime-renewal-production-7344.up.railway.app
